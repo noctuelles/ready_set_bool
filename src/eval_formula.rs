@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/10 12:30:20 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/10 16:37:01 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/11 00:00:00 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,13 @@ enum Token {
     Equi,
 }
 
+#[derive(Debug)]
+struct BTreeNode<T> {
+    value: T,
+    right: Option<Box<BTreeNode<T>>>,
+    left: Option<Box<BTreeNode<T>>>,
+}
+
 fn char_to_token(c: char) -> Option<Token> {
     match c {
         '1' => Some(Token::True),
@@ -33,12 +40,6 @@ fn char_to_token(c: char) -> Option<Token> {
         '>' => Some(Token::Impl),
         '=' => Some(Token::Equi),
         _ => None,
-    }
-}
-
-fn apply_operator(tkn: &Token,) -> bool {
-    match tkn {
-        Token::
     }
 }
 
@@ -59,7 +60,39 @@ fn eval_formula(formula: &str) -> bool {
 
     match tkns {
         Ok(tkns) => {
-            println!("{}", tkns.len());
+            let mut output: Vec<BTreeNode<Token>> = Vec::new();
+
+            for tkn in tkns {
+                match tkn {
+                    Token::True | Token::False => output.push(BTreeNode {
+                        value: tkn,
+                        right: None,
+                        left: None,
+                    }),
+                    Token::Not => {
+                        let a = output.pop().unwrap();
+
+                        output.push(BTreeNode {
+                            value: tkn,
+                            right: Some(Box::new(a)),
+                            left: None,
+                        })
+                    }
+                    _ => {
+                        let a = output.pop().unwrap();
+                        let b = output.pop().unwrap();
+
+                        output.push(BTreeNode {
+                            value: tkn,
+                            right: Some(Box::new(a)),
+                            left: Some(Box::new(b)),
+                        })
+                    }
+                }
+            }
+
+            println!("{:#?}", output);
+
             true
         }
         Err(err) => err,
@@ -68,6 +101,11 @@ fn eval_formula(formula: &str) -> bool {
 
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_eval_formula() {
+        eval_formula("101|&");
+    }
 
     #[test]
     fn test_lex_wrong_formula() {
