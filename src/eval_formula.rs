@@ -6,9 +6,11 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/10 12:30:20 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/11 00:00:00 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/11 13:36:28 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+use std::fmt::{self};
 
 #[derive(Debug, PartialEq)]
 enum Token {
@@ -20,6 +22,12 @@ enum Token {
     Xor,
     Impl,
     Equi,
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Debug)]
@@ -43,59 +51,93 @@ fn char_to_token(c: char) -> Option<Token> {
     }
 }
 
-fn lex(formula: &str) -> Result<Vec<Token>, bool> {
+fn lex(formula: &str) -> Result<Vec<Token>, String> {
     let mut tkns: Vec<Token> = Vec::new();
 
     for c in formula.chars() {
         match char_to_token(c) {
             Some(tkn) => tkns.push(tkn),
-            None => return Err(false),
+            None => return Err(format!("{} is not a valid operand / operator.", c)),
         };
     }
     Ok(tkns)
 }
 
-fn eval_formula(formula: &str) -> bool {
-    let tkns = lex(formula);
+fn parse(tkns: Vec<Token>) -> Result<BTreeNode<Token>, String> {
+    let mut output: Vec<BTreeNode<Token>> = Vec::new();
 
-    match tkns {
-        Ok(tkns) => {
-            let mut output: Vec<BTreeNode<Token>> = Vec::new();
-
-            for tkn in tkns {
-                match tkn {
-                    Token::True | Token::False => output.push(BTreeNode {
+    for tkn in tkns {
+        match tkn {
+            /* Operands */
+            Token::True | Token::False => output.push(BTreeNode {
+                value: tkn,
+                right: None,
+                left: None,
+            }),
+            /* Operators */
+            Token::Not => {
+                if let Some(a) = output.pop() {
+                    output.push(BTreeNode {
                         value: tkn,
-                        right: None,
+                        right: Some(Box::new(a)),
                         left: None,
-                    }),
-                    Token::Not => {
-                        let a = output.pop().unwrap();
-
-                        output.push(BTreeNode {
-                            value: tkn,
-                            right: Some(Box::new(a)),
-                            left: None,
-                        })
-                    }
-                    _ => {
-                        let a = output.pop().unwrap();
-                        let b = output.pop().unwrap();
-
-                        output.push(BTreeNode {
-                            value: tkn,
-                            right: Some(Box::new(a)),
-                            left: Some(Box::new(b)),
-                        })
-                    }
+                    })
+                } else {
+                    return Err(format!("{} requires one operand.", tkn.to_string()));
                 }
             }
-
-            println!("{:#?}", output);
-
-            true
+            Token::And | Token::Or | Token::Xor | Token::Equi | Token::Impl => {
+                if let (Some(a), Some(b)) = (output.pop(), output.pop()) {
+                    output.push(BTreeNode {
+                        value: tkn,
+                        right: Some(Box::new(a)),
+                        left: Some(Box::new(b)),
+                    })
+                } else {
+                    return Err(format!("{} requires two operands.", tkn.to_string()));
+                }
+            }
         }
-        Err(err) => err,
+    }
+    Ok(output.pop().unwrap())
+}
+
+fn eval(node: &BTreeNode<Token>) -> bool {
+    let mut p = false;
+    let mut q = false;
+
+    if let Some(node) = node.right.as_ref() {
+        p = eval(node);
+    }
+    if let Some(node) = node.left.as_ref() {
+        q = eval(node);
+    }
+
+    match node.value {
+        Token::True => true,
+        Token::False => false,
+        Token::Not => !p,
+        Token::Or => p | q,
+        Token::And => p & q,
+        Token::Xor => p ^ q,
+        Token::Equi => p == q,
+        Token::Impl => !p | q,
+    }
+}
+
+pub fn eval_formula(formula: &str) -> bool {
+    match lex(formula) {
+        Ok(tkns) => match parse(tkns) {
+            Ok(ast_root) => eval(&ast_root),
+            Err(message) => {
+                println!("An error occured during parsing : {}", message);
+                false
+            }
+        },
+        Err(message) => {
+            println!("An error occured during lexing : {}", message);
+            false
+        }
     }
 }
 
@@ -104,7 +146,22 @@ mod tests {
 
     #[test]
     fn test_eval_formula() {
-        eval_formula("101|&");
+        assert_eq!(false, eval_formula("10&"));
+        assert_eq!(true, eval_formula("10|"));
+        assert_eq!(true, eval_formula("11>"));
+        assert_eq!(false, eval_formula("10="));
+        assert_eq!(true, eval_formula("1011||="));
+
+        /* F(X,Y,Z) = (X & Y) | (!X & Z) : If X then Y else Z */
+
+        assert_eq!(false, eval_formula("00&0!0&|")); // x = 0, y = 0, z = 0
+        assert_eq!(false, eval_formula("10&1!0&|")); // x = 1, y = 0, z = 0
+        assert_eq!(false, eval_formula("01&0!0&|")); // x = 0, y = 1, z = 0
+        assert_eq!(true, eval_formula("00&0!1&|")); // x = 0, y = 0, z = 1
+        assert_eq!(true, eval_formula("11&1!0&|")); // x = 1, y = 1, z = 0
+        assert_eq!(true, eval_formula("01&0!1&|")); // x = 0, y = 1, z = 1
+        assert_eq!(false, eval_formula("10&1!1&|")); // x = 1, y = 0, z = 1
+        assert_eq!(true, eval_formula("11&1!1&|")); // x = 1, y = 1, z = 1
     }
 
     #[test]
