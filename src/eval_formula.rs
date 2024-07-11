@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/10 12:30:20 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/11 13:36:28 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/11 13:47:00 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ fn lex(formula: &str) -> Result<Vec<Token>, String> {
     for c in formula.chars() {
         match char_to_token(c) {
             Some(tkn) => tkns.push(tkn),
-            None => return Err(format!("{} is not a valid operand / operator.", c)),
+            None => return Err(format!("{} is not a valid operand / operator", c)),
         };
     }
     Ok(tkns)
@@ -83,7 +83,7 @@ fn parse(tkns: Vec<Token>) -> Result<BTreeNode<Token>, String> {
                         left: None,
                     })
                 } else {
-                    return Err(format!("{} requires one operand.", tkn.to_string()));
+                    return Err(format!("{} requires one operand", tkn.to_string()));
                 }
             }
             Token::And | Token::Or | Token::Xor | Token::Equi | Token::Impl => {
@@ -94,10 +94,13 @@ fn parse(tkns: Vec<Token>) -> Result<BTreeNode<Token>, String> {
                         left: Some(Box::new(b)),
                     })
                 } else {
-                    return Err(format!("{} requires two operands.", tkn.to_string()));
+                    return Err(format!("{} requires two operands", tkn.to_string()));
                 }
             }
         }
+    }
+    if output.len() != 1 {
+        return Err(String::from("trailing operands"));
     }
     Ok(output.pop().unwrap())
 }
@@ -130,12 +133,12 @@ pub fn eval_formula(formula: &str) -> bool {
         Ok(tkns) => match parse(tkns) {
             Ok(ast_root) => eval(&ast_root),
             Err(message) => {
-                println!("An error occured during parsing : {}", message);
+                println!("an error occured during parsing : {}.", message);
                 false
             }
         },
         Err(message) => {
-            println!("An error occured during lexing : {}", message);
+            println!("an error occured during lexing : {}.", message);
             false
         }
     }
@@ -162,6 +165,20 @@ mod tests {
         assert_eq!(true, eval_formula("01&0!1&|")); // x = 0, y = 1, z = 1
         assert_eq!(false, eval_formula("10&1!1&|")); // x = 1, y = 0, z = 1
         assert_eq!(true, eval_formula("11&1!1&|")); // x = 1, y = 1, z = 1
+    }
+
+    #[test]
+    fn test_eval_formula_wrong() {
+        assert_eq!(false, eval_formula("11011"));
+        assert_eq!(false, eval_formula("1&"));
+        assert_eq!(false, eval_formula("1|"));
+        assert_eq!(false, eval_formula("1>"));
+        assert_eq!(false, eval_formula("1="));
+        assert_eq!(false, eval_formula("0^"));
+        assert_eq!(false, eval_formula("!"));
+        assert_eq!(false, eval_formula("1011||=0"));
+        assert_eq!(false, eval_formula("1011||=&"));
+        assert_eq!(false, eval_formula("11&|"));
     }
 
     #[test]
