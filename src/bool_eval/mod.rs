@@ -1,27 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   gray_code.rs                                       :+:      :+:    :+:   */
+/*   mod.rs                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/05 18:22:54 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/11 17:30:51 by plouvel          ###   ########.fr       */
+/*   Created: 2024/07/11 17:17:20 by plouvel           #+#    #+#             */
+/*   Updated: 2024/07/11 18:14:45 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* https://www.youtube.com/watch?v=xuw8HSEP_eI */
+mod lexer;
+mod parser;
 
-pub fn gray_code(n: u32) -> u32 {
-    let mut r = 0;
-    let mut i = 0;
+use crate::binary_tree::BTreeNode;
 
-    while i < 31 {
-        let a = n & (1 << i);
-        let n = (n & (1 << (i + 1))) >> 1;
-        r |= a ^ n;
-        i = i + 1;
-    }
-    r |= n & (1 << 31);
-    r
+pub enum Operand {
+    Immediate(bool),
+    Variable(bool),
 }
+
+pub enum Operator {
+    And,
+    Or,
+    Xor,
+    Not,
+    Impl,
+    Equi,
+}
+
+pub enum BoolEvalNodeValue {
+    Operand(Operand),
+    Operator(Operator),
+}
+
+pub type ASTBoolEval = BTreeNode<BoolEvalNodeValue>;

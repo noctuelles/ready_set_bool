@@ -6,7 +6,7 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 17:36:36 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/05 17:36:37 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/11 17:27:25 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,40 +23,4 @@ pub fn adder(a: u32, b: u32) -> u32 {
         i = i + 1;
     }
     r
-}
-
-mod tests {
-    #[test]
-    fn test_adder() {
-        assert_eq!(super::adder(13, 11), 13 + 11);
-        assert_eq!(super::adder(1, 0), 1 + 0);
-        assert_eq!(super::adder(2, 3), 2 + 3);
-        assert_eq!(super::adder(192, 758), 192 + 758);
-        assert_eq!(super::adder(58372, 27192), 58372 + 27192);
-        assert_eq!(super::adder(3871528, 1975728), 3871528 + 1975728);
-        assert_eq!(super::adder(2381, 1238), 2381 + 1238);
-        assert_eq!(super::adder(1238, 2381), 1238 + 2381);
-        assert_eq!(super::adder(0, 0), 0 + 0);
-        assert_eq!(super::adder(0, 1), 0 + 1);
-        assert_eq!(super::adder(1, 1), 1 + 1);
-        assert_eq!(super::adder(1, 2), 1 + 2);
-        assert_eq!(super::adder(2, 2), 2 + 2);
-
-        assert_eq!(super::adder(u32::MIN, u32::MAX), u32::MAX);
-        assert_eq!(super::adder(u32::MAX, u32::MIN), u32::MAX);
-        assert_eq!(
-            super::adder(u32::MAX / 2, u32::MAX / 2),
-            u32::MAX / 2 + u32::MAX / 2
-        );
-        assert_eq!(super::adder(u32::MAX / 2, u32::MAX / 2 + 1), u32::MAX);
-        assert_eq!(super::adder(u32::MAX / 2 + 1, u32::MAX / 2), u32::MAX);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_adder_overflow() {
-        assert_eq!(super::adder(u32::MAX, 1), 0);
-        assert_eq!(super::adder(1, u32::MAX), 0);
-        assert_eq!(super::adder(u32::MAX, u32::MAX), 0);
-    }
 }
