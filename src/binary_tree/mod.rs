@@ -6,11 +6,11 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:08:41 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/11 17:31:51 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/12 19:46:12 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BTreeNode<T> {
     pub value: T,
     pub right: Option<Box<BTreeNode<T>>>,
