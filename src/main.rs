@@ -4,6 +4,7 @@ mod bool_eval;
 mod eval_formula;
 mod gray_code;
 mod multiplier;
+mod truth_table;
 
 fn main() {
     println!("This project being purely an exercice, take a look and run the tests instead !");
@@ -104,48 +105,66 @@ mod tests {
             );
         }
     }
-    // mod eval_formula {
-    //     #[test]
-    //     fn simple_valid() {
-    //         use crate::eval_formula::*;
+    mod eval_formula {
 
-    //         assert_eq!(false, eval_formula("10&"));
-    //         assert_eq!(true, eval_formula("10|"));
-    //         assert_eq!(true, eval_formula("11>"));
-    //         assert_eq!(false, eval_formula("10="));
-    //         assert_eq!(true, eval_formula("1011||="));
-    //     }
+        #[test]
+        fn simple_valid() {
+            use crate::eval_formula::*;
 
-    //     #[test]
-    //     fn intermediate_valid() {
-    //         use crate::eval_formula::*;
+            assert_eq!(false, eval_formula("10&"));
+            assert_eq!(true, eval_formula("10|"));
+            assert_eq!(true, eval_formula("11>"));
+            assert_eq!(false, eval_formula("10="));
+            assert_eq!(true, eval_formula("1011||="));
+        }
 
-    //         /* F(X,Y,Z) = (X & Y) | (!X & Z) : If X then Y else Z */
+        #[test]
+        fn intermediate_valid() {
+            use crate::eval_formula::*;
 
-    //         assert_eq!(false, eval_formula("00&0!0&|")); // x = 0, y = 0, z = 0
-    //         assert_eq!(false, eval_formula("10&1!0&|")); // x = 1, y = 0, z = 0
-    //         assert_eq!(false, eval_formula("01&0!0&|")); // x = 0, y = 1, z = 0
-    //         assert_eq!(true, eval_formula("00&0!1&|")); // x = 0, y = 0, z = 1
-    //         assert_eq!(true, eval_formula("11&1!0&|")); // x = 1, y = 1, z = 0
-    //         assert_eq!(true, eval_formula("01&0!1&|")); // x = 0, y = 1, z = 1
-    //         assert_eq!(false, eval_formula("10&1!1&|")); // x = 1, y = 0, z = 1
-    //         assert_eq!(true, eval_formula("11&1!1&|")); // x = 1, y = 1, z = 1
-    //     }
+            assert_eq!(false, eval_formula("00&0!0&|")); // x = 0, y = 0, z = 0
+            assert_eq!(false, eval_formula("10&1!0&|")); // x = 1, y = 0, z = 0
+            assert_eq!(false, eval_formula("01&0!0&|")); // x = 0, y = 1, z = 0
+            assert_eq!(true, eval_formula("00&0!1&|")); // x = 0, y = 0, z = 1
+            assert_eq!(true, eval_formula("11&1!0&|")); // x = 1, y = 1, z = 0
+            assert_eq!(true, eval_formula("01&0!1&|")); // x = 0, y = 1, z = 1
+            assert_eq!(false, eval_formula("10&1!1&|")); // x = 1, y = 0, z = 1
+            assert_eq!(true, eval_formula("11&1!1&|")); // x = 1, y = 1, z = 1
+        }
 
-    //     #[test]
-    //     fn invalid() {
-    //         use crate::eval_formula::*;
+        #[test]
+        fn invalid() {
+            use crate::eval_formula::*;
 
-    //         assert_eq!(false, eval_formula("11011"));
-    //         assert_eq!(false, eval_formula("1&"));
-    //         assert_eq!(false, eval_formula("1|"));
-    //         assert_eq!(false, eval_formula("1>"));
-    //         assert_eq!(false, eval_formula("1="));
-    //         assert_eq!(false, eval_formula("0^"));
-    //         assert_eq!(false, eval_formula("!"));
-    //         assert_eq!(false, eval_formula("1011||=0"));
-    //         assert_eq!(false, eval_formula("1011||=&"));
-    //         assert_eq!(false, eval_formula("11&|"));
-    //     }
-    // }
+            assert_eq!(false, eval_formula("11011"));
+            assert_eq!(false, eval_formula("1&"));
+            assert_eq!(false, eval_formula("1|"));
+            assert_eq!(false, eval_formula("1>"));
+            assert_eq!(false, eval_formula("1="));
+            assert_eq!(false, eval_formula("0^"));
+            assert_eq!(false, eval_formula("!"));
+            assert_eq!(false, eval_formula("1011||=0"));
+            assert_eq!(false, eval_formula("1011||=&"));
+            assert_eq!(false, eval_formula("11&|"));
+        }
+    }
+
+    mod print_truth_table {
+        #[test]
+        fn test() {
+            use crate::truth_table::print_truth_table;
+
+            print_truth_table("AB&");
+            print_truth_table("AB|");
+            print_truth_table("AB^");
+            print_truth_table("AB=");
+            print_truth_table("AB>");
+            print_truth_table("A!B|");
+
+            print_truth_table("AB&A!C&|");
+            print_truth_table("BD&CD!&|");
+            print_truth_table("BC^D^");
+            print_truth_table("CBD!|^");
+        }
+    }
 }

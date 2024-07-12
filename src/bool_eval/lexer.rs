@@ -6,9 +6,11 @@
 /*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:42:21 by plouvel           #+#    #+#             */
-/*   Updated: 2024/07/11 18:03:20 by plouvel          ###   ########.fr       */
+/*   Updated: 2024/07/12 11:53:19 by plouvel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
@@ -21,6 +23,22 @@ pub enum Token {
     Xor,
     Impl,
     Equi,
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Token::Letter(c) => write!(f, "{}", c),
+            Token::True => write!(f, "1"),
+            Token::False => write!(f, "0"),
+            Token::Not => write!(f, "!"),
+            Token::And => write!(f, "&"),
+            Token::Or => write!(f, "|"),
+            Token::Xor => write!(f, "^"),
+            Token::Impl => write!(f, ">"),
+            Token::Equi => write!(f, "="),
+        }
+    }
 }
 
 fn c_to_tkn(c: char) -> Option<Token> {
